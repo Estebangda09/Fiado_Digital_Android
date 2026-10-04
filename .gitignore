@@ -1,0 +1,56 @@
+# Archivos de compilación
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+build/
+.cxx/
+
+# Gradle
+.gradle/
+/local.properties
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Archivos de Android Studio / IntelliJ
+*.iml
+.idea/
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+captures/
+*.log
+
+# NDK
+obj/
+.externalNativeBuild/
+
+# Keystore (¡importante!)
+*.jks
+*.keystore
+
+# Archivos de Google Services (si contienen claves privadas)
+google-services.json
+
+# Archivos generados por Lint
+lint/intermediates/
+lint/generated/
+lint/outputs/
+lint/tmp/
+
+# Archivos de Proguard
+proguard/
+
+# Versiones de Java
+hs_err_pid*
+
+# Archivos de Kotlin
+.kotlin/
