@@ -9,7 +9,7 @@
     android:background="#FFFFFF"
     tools:context=".SeleccionRegistroActivity">
 
-    <!-- CABECERA: Logo y Título -->
+    <!-- Logo y Título -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -53,7 +53,7 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- TÍTULO DE LA PANTALLA -->
+    <!-- Titulo -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -66,7 +66,7 @@
         android:textSize="22sp"
         android:textStyle="bold" />
 
-    <!-- BOTÓN: NUEVO CLIENTE -->
+    <!-- Nuevo CLiente -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/btnNuevoCliente"
         android:layout_width="match_parent"
@@ -88,7 +88,7 @@
             android:padding="16dp"
             android:gravity="center_vertical">
 
-            <!-- Ícono Cliente -->
+            <!-- icono Cliente -->
             <androidx.cardview.widget.CardView
                 android:layout_width="48dp"
                 android:layout_height="48dp"
@@ -130,7 +130,7 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
-            <!-- Flecha de navegación -->
+            <!-- Flecha navgar -->
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -139,7 +139,7 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- BOTÓN: NUEVO ALMACÉN -->
+    <!-- NUEVO ALMACeN -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/btnNuevoAlmacen"
         android:layout_width="match_parent"
@@ -160,7 +160,7 @@
             android:padding="16dp"
             android:gravity="center_vertical">
 
-            <!-- Ícono Almacén -->
+            <!-- icono Almacén -->
             <androidx.cardview.widget.CardView
                 android:layout_width="48dp"
                 android:layout_height="48dp"
@@ -202,7 +202,7 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
-            <!-- Flecha de navegación -->
+            <!-- Flecha de navegacion -->
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
