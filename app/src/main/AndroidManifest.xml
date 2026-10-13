@@ -36,6 +36,9 @@
         <activity
             android:name=".InicioClienteActivity"
             android:exported="false" />
+        <activity
+            android:name=".InicioAlmaceneroActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

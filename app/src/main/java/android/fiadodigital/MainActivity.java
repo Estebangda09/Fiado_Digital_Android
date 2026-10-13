@@ -47,5 +47,19 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        // DEBUG: accesos directos a cada pantalla
+        abrirPantalla(R.id.btnDebugCliente, InicioClienteActivity.class);
+        abrirPantalla(R.id.btnDebugAlmacenero, InicioAlmaceneroActivity.class);
+        abrirPantalla(R.id.btnDebugRegistro, SeleccionRegistroActivity.class);
+    }
+
+    private void abrirPantalla(int idVista, final Class<?> destino) {
+        findViewById(idVista).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, destino));
+            }
+        });
     }
 }
