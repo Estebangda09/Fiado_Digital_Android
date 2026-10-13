@@ -33,6 +33,9 @@
             android:name=".RegistroAlmacenActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".InicioClienteActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

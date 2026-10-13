@@ -37,5 +37,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        View btnIngresar = findViewById(R.id.btnIngresar);
+        btnIngresar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO: derivar segun el tipo de usuario (cliente / almacen)
+                Intent intent = new Intent(MainActivity.this, InicioClienteActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }
