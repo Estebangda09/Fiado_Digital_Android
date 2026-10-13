@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Android_FiadoDigital</string>
+    <string name="title_activity_creacion_usuario">CreacionUsuarioActivity</string>
 </resources>

@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Android_FiadoDigital">
         <activity
+            android:name=".CreacionUsuarioActivity"
+            android:exported="false"
+            android:label="@string/title_activity_creacion_usuario"
+            android:theme="@style/Theme.Android_FiadoDigital" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -20,6 +25,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".SeleccionRegistroActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".RegistroAlmacenActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".InicioClienteActivity"
+            android:exported="false" />
+        <activity
+            android:name=".InicioAlmaceneroActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
