@@ -1,21 +1,44 @@
 package android.fiadodigital;
 
+import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.materialswitch.MaterialSwitch;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
 
 public class InicioAlmaceneroActivity extends AppCompatActivity {
 
@@ -68,6 +91,27 @@ public class InicioAlmaceneroActivity extends AppCompatActivity {
             this.importe = importe;
             this.fecha = fecha;
         }
+    }
+
+    private static class Cliente {
+        final String nombre;
+        final String documento;
+
+        Cliente(String nombre, String documento) {
+            this.nombre = nombre;
+            this.documento = documento;
+        }
+    }
+
+    // TODO: reemplazar por los clientes reales del almacenero
+    private List<Cliente> clientesDeEjemplo() {
+        List<Cliente> lista = new ArrayList<>();
+        lista.add(new Cliente("Juan Pérez", "30.123.456"));
+        lista.add(new Cliente("María López", "27.845.102"));
+        lista.add(new Cliente("Carlos Ruiz", "33.640.997"));
+        lista.add(new Cliente("Ana Gómez", "35.112.480"));
+        lista.add(new Cliente("Pedro Sosa", "28.990.331"));
+        return lista;
     }
 
     private void cargarCuentas() {
@@ -189,8 +233,7 @@ public class InicioAlmaceneroActivity extends AppCompatActivity {
         findViewById(R.id.navNuevoFiado).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: abrir el formulario existente de nuevo fiado
-                avisoPendiente("Nuevo fiado");
+                mostrarDialogoNuevoFiado();
             }
         });
 
@@ -207,6 +250,243 @@ public class InicioAlmaceneroActivity extends AppCompatActivity {
                 avisoPendiente("Cuenta");
             }
         });
+    }
+
+    // ------------------------------------------------------------------
+    // Diálogo: registrar compra fiada
+    // ------------------------------------------------------------------
+    private void mostrarDialogoNuevoFiado() {
+        View vista = LayoutInflater.from(this).inflate(R.layout.dialog_registrar_fiado, null);
+
+        final TextInputEditText etBuscar = vista.findViewById(R.id.etBuscarCliente);
+        final MaterialCardView cardResultados = vista.findViewById(R.id.cardResultados);
+        final LinearLayout contenedorResultados = vista.findViewById(R.id.contenedorResultados);
+        final TextView tvSinResultados = vista.findViewById(R.id.tvSinResultados);
+        final TextInputEditText etDetalle = vista.findViewById(R.id.etDetalle);
+        final TextInputEditText etMonto = vista.findViewById(R.id.etMonto);
+        final MaterialSwitch switchVencimiento = vista.findViewById(R.id.switchVencimiento);
+        final LinearLayout contenedorVencimiento = vista.findViewById(R.id.contenedorVencimiento);
+        final TextInputEditText etFecha = vista.findViewById(R.id.etFechaVencimiento);
+        final MaterialAutoCompleteTextView autoInteres = vista.findViewById(R.id.autoInteres);
+        final TextView tvSinPorcentajes = vista.findViewById(R.id.tvSinPorcentajes);
+
+        final List<Cliente> clientes = clientesDeEjemplo();
+        final String[] porcentajes = cargarPorcentajesInteres();
+        final Cliente[] seleccionado = new Cliente[1];
+
+        final AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setView(vista)
+                .setBackground(ContextCompat.getDrawable(this, R.drawable.bg_dialog_registrar_fiado))
+                .create();
+
+        // Fecha de vencimiento: por defecto, hoy
+        final Calendar calendario = Calendar.getInstance();
+        final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy", new Locale("es", "AR"));
+        etFecha.setText(formatoFecha.format(calendario.getTime()));
+
+        etFecha.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatePickerDialog picker = new DatePickerDialog(
+                        InicioAlmaceneroActivity.this,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, int anio, int mes, int dia) {
+                                calendario.set(anio, mes, dia);
+                                etFecha.setText(formatoFecha.format(calendario.getTime()));
+                            }
+                        },
+                        calendario.get(Calendar.YEAR),
+                        calendario.get(Calendar.MONTH),
+                        calendario.get(Calendar.DAY_OF_MONTH));
+                picker.show();
+            }
+        });
+
+        // Interés: solo porcentajes configurados (sin texto libre)
+        if (porcentajes.length == 0) {
+            autoInteres.setEnabled(false);
+            tvSinPorcentajes.setVisibility(View.VISIBLE);
+        } else {
+            ArrayAdapter<String> adaptador = new ArrayAdapter<>(
+                    this, android.R.layout.simple_list_item_1, porcentajes);
+            autoInteres.setAdapter(adaptador);
+        }
+
+        // Mostrar/ocultar campos de vencimiento
+        switchVencimiento.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                contenedorVencimiento.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            }
+        });
+
+        // Búsqueda instantánea de clientes
+        final boolean[] desdeSeleccion = {false};
+        etBuscar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (desdeSeleccion[0]) {
+                    desdeSeleccion[0] = false;
+                    return;
+                }
+                seleccionado[0] = null;
+                mostrarCoincidencias(s.toString(), clientes, contenedorResultados,
+                        cardResultados, tvSinResultados, etBuscar, seleccionado, desdeSeleccion);
+            }
+        });
+
+        // Cerrar / cancelar
+        vista.findViewById(R.id.btnCerrarFiado).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        vista.findViewById(R.id.btnCancelarFiado).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        // Registrar fiado
+        vista.findViewById(R.id.btnRegistrarFiado).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String detalle = texto(etDetalle);
+                String monto = texto(etMonto);
+
+                if (seleccionado[0] == null) {
+                    etBuscar.setError("Seleccioná un cliente de la lista");
+                    return;
+                }
+                if (detalle.isEmpty()) {
+                    etDetalle.setError("Ingresá el detalle de la compra");
+                    return;
+                }
+                if (monto.isEmpty()) {
+                    etMonto.setError("Ingresá el monto");
+                    return;
+                }
+                double importe;
+                try {
+                    importe = Double.parseDouble(monto.replace(",", "."));
+                } catch (NumberFormatException e) {
+                    etMonto.setError("Monto inválido");
+                    return;
+                }
+                if (importe <= 0) {
+                    etMonto.setError("El monto debe ser mayor a 0");
+                    return;
+                }
+                if (switchVencimiento.isChecked()) {
+                    if (porcentajes.length == 0) {
+                        Toast.makeText(InicioAlmaceneroActivity.this,
+                                "Agregá porcentajes desde Cuenta", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (texto(etFecha).isEmpty()) {
+                        etFecha.setError("Elegí una fecha");
+                        return;
+                    }
+                    if (autoInteres.getText().toString().trim().isEmpty()) {
+                        autoInteres.setError("Elegí un interés");
+                        return;
+                    }
+                }
+
+                // TODO: guardar la compra fiada en la base de datos
+                Toast.makeText(InicioAlmaceneroActivity.this,
+                        "Fiado registrado: " + seleccionado[0].nombre + " · $ " + monto,
+                        Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void mostrarCoincidencias(String consulta, List<Cliente> clientes,
+                                      LinearLayout contenedor, MaterialCardView card,
+                                      TextView tvSinResultados, TextInputEditText etBuscar,
+                                      Cliente[] seleccionado, boolean[] desdeSeleccion) {
+        contenedor.removeAllViews();
+        String q = consulta.trim().toLowerCase();
+
+        if (q.isEmpty()) {
+            card.setVisibility(View.GONE);
+            tvSinResultados.setVisibility(View.GONE);
+            return;
+        }
+
+        List<Cliente> coincidencias = new ArrayList<>();
+        for (Cliente cliente : clientes) {
+            String doc = cliente.documento.replace(".", "");
+            if (cliente.nombre.toLowerCase().contains(q) || doc.contains(q)) {
+                coincidencias.add(cliente);
+            }
+        }
+
+        if (coincidencias.isEmpty()) {
+            card.setVisibility(View.GONE);
+            tvSinResultados.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        tvSinResultados.setVisibility(View.GONE);
+        card.setVisibility(View.VISIBLE);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (final Cliente cliente : coincidencias) {
+            View item = inflater.inflate(R.layout.item_resultado_cliente, contenedor, false);
+            ((TextView) item.findViewById(R.id.tvIniciales)).setText(iniciales(cliente.nombre));
+            ((TextView) item.findViewById(R.id.tvNombre)).setText(cliente.nombre);
+            ((TextView) item.findViewById(R.id.tvDocumento)).setText("DNI " + cliente.documento);
+            item.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    seleccionado[0] = cliente;
+                    desdeSeleccion[0] = true;
+                    etBuscar.setText(cliente.nombre + " · " + cliente.documento);
+                    etBuscar.setSelection(etBuscar.getText().length());
+                    etBuscar.setError(null);
+                    card.setVisibility(View.GONE);
+                    tvSinResultados.setVisibility(View.GONE);
+                    ocultarTeclado(etBuscar);
+                }
+            });
+            contenedor.addView(item);
+        }
+    }
+
+    private String iniciales(String nombre) {
+        String[] partes = nombre.trim().split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < partes.length && i < 2; i++) {
+            if (!partes[i].isEmpty()) {
+                sb.append(Character.toUpperCase(partes[i].charAt(0)));
+            }
+        }
+        return sb.toString();
+    }
+
+    private void ocultarTeclado(View vista) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(vista.getWindowToken(), 0);
+        }
+    }
+
+    // TODO: tomar los porcentajes de la configuración del almacenero (Cuenta)
+    private String[] cargarPorcentajesInteres() {
+        return new String[]{"5%", "10%", "15%", "20%"};
     }
 
     // ------------------------------------------------------------------
@@ -260,5 +540,9 @@ public class InicioAlmaceneroActivity extends AppCompatActivity {
 
     private int color(String hex) {
         return android.graphics.Color.parseColor(hex);
+    }
+
+    private String texto(TextInputEditText campo) {
+        return campo.getText() != null ? campo.getText().toString().trim() : "";
     }
 }
